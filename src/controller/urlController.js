@@ -8,25 +8,25 @@ const redis = require("redis");
 const { promisify } = require("util");
 
 //Connect to redis
-const redisClient = redis.createClient(
-    14951,
-    "redis-14951.c212.ap-south-1-1.ec2.cloud.redislabs.com",
-    { no_ready_check: true }
-);
-redisClient.auth("L5yqDhOI1FMd2je3LWxV4ESAua90Mw0U", function (err) {
-    if (err) throw err;
-});
+// const redisClient = redis.createClient(
+//     14951,
+//     "redis-14951.c212.ap-south-1-1.ec2.cloud.redislabs.com",
+//     { no_ready_check: true }
+// );
+// redisClient.auth("L5yqDhOI1FMd2je3LWxV4ESAua90Mw0U", function (err) {
+//     if (err) throw err;
+// });
 
-redisClient.on("connect", async function () {
-    console.log("Connected to Redis..");
-});
+// redisClient.on("connect", async function () {
+//     console.log("Connected to Redis..");
+// });
 
 
 
 //Connection setup for redis
 
-const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
-const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
+// const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
+// const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
 //===============Validation Functions============================
 
@@ -69,19 +69,19 @@ const shortenUrl = async (req, res) => {
         //if the Long url is already exist
 
         //  check for data in the cache
-        let cachedlinkdata = await GET_ASYNC(`${req.body.longUrl}`)
+        //let cachedlinkdata = await GET_ASYNC(`${req.body.longUrl}`)
 
-        if (cachedlinkdata) {
-            let change = JSON.parse(cachedlinkdata)
-            return res.status(200).send({ status: true, redisdata: change })
-        }
+        // if (cachedlinkdata) {
+        //     let change = JSON.parse(cachedlinkdata)
+        //     return res.status(200).send({ status: true, redisdata: change })
+        // }
 
         // check for data in the Database
         const alreadyExistUrl = await urlModel.findOne({ longUrl: longUrl }).select({ createdAt: 0, updatedAt: 0, __v: 0, _id: 0 })
 
         if (alreadyExistUrl) {
             //setting data in cache
-            await SET_ASYNC(`${req.body.longUrl}`, JSON.stringify(alreadyExistUrl));
+           // await SET_ASYNC(`${req.body.longUrl}`, JSON.stringify(alreadyExistUrl));
             return res.status(200).send({ status: true, message: "Shorten link already generated previously", data: alreadyExistUrl })
         } else {
             
@@ -106,7 +106,7 @@ const shortenUrl = async (req, res) => {
             let createUrl = await urlModel.create(generateUrl)
 
             // setting data in cache
-            await SET_ASYNC(`${longUrl}`, JSON.stringify(generateUrl))
+            //await SET_ASYNC(`${longUrl}`, JSON.stringify(generateUrl))
 
             return res.status(201).send({ status: true, message: "Short url Successfully created", data: generateUrl })
         }
@@ -123,15 +123,15 @@ const getUrl = async (req, res) => {
         let urlCode = req.params.urlCode
 
         //taking data from cache
-        let cahcedUrlData = await GET_ASYNC(`${urlCode}`)
+       // let cahcedUrlData = await GET_ASYNC(`${urlCode}`)
 
-        let data = JSON.parse(cahcedUrlData);
+       // let data = JSON.parse(cahcedUrlData);
 
         //if data present in cache
-        if (cahcedUrlData) {
-            res.status(302).redirect(`${data.longUrl}`)
-        }
-        else {
+        // if (cahcedUrlData) {
+        //     res.status(302).redirect(`${data.longUrl}`)
+        // }
+        //else {
 
             //if data is not there in cache
             let urlData = await urlModel.findOne({ urlCode: urlCode })
@@ -141,10 +141,10 @@ const getUrl = async (req, res) => {
             }
 
             //setting data in cache
-            await SET_ASYNC(`${urlCode}`, JSON.stringify(urlData))
+            //await SET_ASYNC(`${urlCode}`, JSON.stringify(urlData))
 
             return res.status(302).redirect(`${urlData.longUrl}`)
-        }
+       // }
 
     }
     catch (error) {
